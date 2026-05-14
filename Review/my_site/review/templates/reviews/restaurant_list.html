@@ -16,7 +16,7 @@
                     <p class="card-text"><small class="text-muted">{{ restaurant.address }}</small></p>
                 </div>
                 <div class="card-footer bg-white border-top-0">
-                    <a href="#" class="btn btn-primary w-100">Переглянути відгуки</a>
+                    <a href="{% url 'restaurant-detail' restaurant.pk %}" class="btn btn-primary w-100">Переглянути відгуки</a>
                 </div>
             </div>
         </div>
