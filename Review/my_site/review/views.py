@@ -1,16 +1,17 @@
 from django.contrib import messages
 from django.http import HttpResponse
 from django.views.generic.list import ListView
-from django.views.generic import View
+from django.views.generic import View, TemplateView
 from .models import Restaurant, Review
 from .forms import LoginForm, ReviewForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.detail import DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 class RestaurantListView(ListView):
@@ -62,3 +63,17 @@ class SignUpView(CreateView):
     template_name = "registration/signup.html"
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
+
+class ProfileView(TemplateView):
+    template_name = "registration/profile.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["reviews"] = Review.objects.filter(user = self.request.user)
+        return context
+
+def delete_review(request, pk):
+    review = get_object_or_404(Review, pk=pk, user=request.user)
+    if request.method == 'POST':
+        review.delete()
+        return redirect('profile')
+    return redirect('profile')

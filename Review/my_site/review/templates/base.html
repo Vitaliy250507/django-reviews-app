@@ -15,6 +15,7 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-light btn-sm">Вийти</button>
                 </form>
+                <a class=" text-white me-3 d-inline" href="{% url 'profile' %}">Profile</a>
             {% else %}
                 <a class=" text-white me-3 d-inline" href="{% url 'login' %}">Sign In</a>
                 <a class=" btn btn-warning btn-sm text-dark px-3" href="{% url 'signup' %}">Sign Up</a>
