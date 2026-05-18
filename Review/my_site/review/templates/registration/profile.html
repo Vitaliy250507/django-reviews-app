@@ -29,10 +29,11 @@
 
                                 <div class="card-footer bg-transparent border-0 pb-3">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="#" class="btn btn-sm btn-outline-primary px-3">Редагувати</a>
-
                                         <button type="button" class="btn btn-sm btn-outline-danger px-3" data-bs-toggle="modal" data-bs-target="#deleteModal{{ review.id }}">
                                             Видалити
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ review.id }}">
+                                            Редагувати
                                         </button>
                                     </div>
                                 </div>
@@ -55,6 +56,33 @@
                                                 <button type="submit" class="btn btn-danger px-4">Так, видалити</button>
                                             </form>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="editModal{{ review.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content shadow border-0">
+                                        <form action="{% url 'update_review' review.id %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title">Редагувати відгук для {{ review.restaurant.name }}</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Ваша оцінка</label>
+                                                    <input type="number" name="rating" class="form-control" value="{{ review.rating }}" min="1" max="5">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Ваш коментар</label>
+                                                    <textarea name="text" class="form-control" rows="4">{{ review.text }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                                                <button type="submit" class="btn btn-success">Зберегти зміни</button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
