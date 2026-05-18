@@ -21,7 +21,8 @@ class RestaurantListView(ListView):
 class BaseView(View):
     def get(self, request):
         return render(request, 'base.html')
-    
+
+
 
 class RestaurantDetailView(LoginRequiredMixin, DetailView):
     template_name = "reviews/restaurant.html"
