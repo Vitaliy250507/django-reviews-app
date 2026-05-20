@@ -12,12 +12,32 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.db.models import Avg, Count
+from django.db.models import Q
 # Create your views here.
 
 class RestaurantListView(ListView):
     template_name = "reviews/restaurant_list.html"
     model = Restaurant
     context_object_name = "restaurants"
+
+    def get_queryset(self):
+        queryset = Restaurant.objects.annotate(
+            avg_rating = Avg('reviews__rating'),
+            reviews_count=Count('reviews')
+            )
+        
+        query_value = self.request.GET.get('q')
+        query_top = self.request.GET.get('top')
+        if query_value:
+            queryset = queryset.filter(
+                Q(name__icontains=query_value) | 
+                Q(address__icontains = query_value) | 
+                Q(description__icontains = query_value
+                ))
+        if query_top:
+            queryset = queryset.filter(avg_rating__gte = 4.5)
+        return queryset
 
 class BaseView(View):
     def get(self, request):
@@ -86,3 +106,5 @@ def update_review(request, pk):
             form.save()
             return redirect('profile')
     return redirect('profile')
+
+

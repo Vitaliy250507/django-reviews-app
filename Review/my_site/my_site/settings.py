@@ -37,13 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'review'
+    'review',
+    "debug_toolbar"
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -124,3 +126,7 @@ MEDIA_URL = "/media/"
 LOGIN_REDIRECT_URL = 'restaurants'
 LOGIN_URL = 'restaurants'
 LOGOUT_REDIRECT_URL = 'restaurants'
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]

@@ -40,3 +40,12 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Відгук від {self.user.username} для {self.restaurant.name}"
+    
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    avatar = models.ImageField("Аватвр", upload_to='avatars/', default='avatars/default.png', blank=True)
+    bio = models.TextField("Про себе", max_length=500, blank=True)
+
+    def __str__(self):
+        return f"Профіль: {self.user.username}"
