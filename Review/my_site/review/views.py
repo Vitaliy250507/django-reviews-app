@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.views.generic.list import ListView
 from django.views.generic import View, TemplateView
-from .models import Restaurant, Review
-from .forms import LoginForm, ReviewForm
+from .models import Restaurant, Review, Profile
+from .forms import LoginForm, ReviewForm, ProfileUpdateImage
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.detail import DetailView
 from django.contrib.auth.views import LoginView, LogoutView
@@ -108,3 +108,22 @@ def update_review(request, pk):
     return redirect('profile')
 
 
+@login_required
+def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    form = ProfileUpdateImage(instance=profile)
+    reviews = Review.objects.filter(user=request.user)
+    
+    return render(request, 'reviews/profile.html', {
+        'reviews': reviews,
+        'profile_form': form
+    })
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileUpdateImage(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+    return redirect('profile') 

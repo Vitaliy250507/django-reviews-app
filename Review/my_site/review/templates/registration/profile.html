@@ -1,101 +1,195 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <h2 class="mb-4 text-center">Мій профіль</h2>
-            <h4 class="mb-4 text-muted">Мої відгуки ({{ reviews.count }})</h4>
-
-            {% if reviews %}
-                <div class="row row-cols-1 row-cols-md-2 g-4">
-                    {% for review in reviews %}
-                        <div class="col">
-                            <div class="card h-100 shadow-sm border-0">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h5 class="card-title mb-0 text-primary">
-                                            <i class="bi bi-shop me-2"></i>{{ review.restaurant.name }}
-                                        </h5>
-                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
-                                            ⭐ {{ review.rating }}/5
-                                        </span>
-                                    </div>
-                                    
-                                    <p class="card-text text-secondary mt-3">
-                                        "{{ review.text|truncatechars:150 }}"
-                                    </p>
-                                </div>
-
-                                <div class="card-footer bg-transparent border-0 pb-3">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-danger px-3" data-bs-toggle="modal" data-bs-target="#deleteModal{{ review.id }}">
-                                            Видалити
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ review.id }}">
-                                            Редагувати
-                                        </button>
-                                    </div>
-                                </div>
+<div id="main-content">
+    <div class="container mt-5">
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-10">
+                <div class="card shadow-sm border-0 p-4">
+                    <div class="d-flex align-items-center flex-column flex-md-row text-center text-md-start">
+                        <div class="me-md-4 mb-3 mb-md-0">
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="rounded-circle shadow" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #f8f9fa;">
+                            {% else %}
+                                <img src="/static/images/default-avatar.png" alt="No Avatar" class="rounded-circle shadow" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center flex-column flex-md-row">
+                                <h2 class="mb-1 fw-bold">{{ user.username }}</h2>
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                    <i class="bi bi-pencil-square me-1"></i>Редагувати профіль
+                                </button>
                             </div>
-
-                            <div class="modal fade" id="deleteModal{{ review.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content shadow border-0">
-                                        <div class="modal-header bg-danger text-white">
-                                            <h5 class="modal-title">Підтвердження</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body text-center py-4">
-                                            <p class="mb-0">Видалити ваш відгук про <strong>{{ review.restaurant.name }}</strong>?</p>
-                                        </div>
-                                        <div class="modal-footer justify-content-center bg-light border-0">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                                            <form action="{% url 'delete_review' review.id %}" method="post" style="display: inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger px-4">Так, видалити</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal fade" id="editModal{{ review.id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content shadow border-0">
-                                        <form action="{% url 'update_review' review.id %}" method="post">
-                                            {% csrf_token %}
-                                            <div class="modal-header bg-primary text-white">
-                                                <h5 class="modal-title">Редагувати відгук для {{ review.restaurant.name }}</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Ваша оцінка</label>
-                                                    <input type="number" name="rating" class="form-control" value="{{ review.rating }}" min="1" max="5">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Ваш коментар</label>
-                                                    <textarea name="text" class="form-control" rows="4">{{ review.text }}</textarea>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                                                <button type="submit" class="btn btn-success">Зберегти зміни</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+                            <p class="text-muted mb-3">Користувач з {{ user.date_joined|date:"F Y" }} року</p>
+                            
+                            <div class="bg-light p-3 rounded">
+                                <h6 class="fw-bold mb-1">Про мене:</h6>
+                                <p class="mb-0 text-secondary">
+                                    {{ user.profile.bio|default:"Цей користувач ще нічого про себе не написав."|linebreaksbr }}
+                                </p>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
-            {% else %}
-                <div class="text-center py-5 bg-light rounded shadow-sm">
-                    <p class="text-muted mb-3">Ви ще не залишили жодного відгуку.</p>
-                    <a href="{% url 'restaurants' %}" class="btn btn-primary px-4">Переглянути ресторани</a>
-                </div>
-            {% endif %}
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <h2 class="mb-4 text-center text-dark">Мій профіль</h2>
+                <h4 class="mb-4 text-muted text-center">Мої відгуки ({{ reviews.count }})</h4>
+                
+                {% if reviews %}
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for review in reviews %}
+                            <div class="col">
+                                <div class="card h-100 shadow-sm border-0">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title mb-0 text-primary">
+                                                <i class="bi bi-shop me-2"></i>{{ review.restaurant.name }}
+                                            </h5>
+                                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                                ⭐ {{ review.rating }}/5
+                                            </span>
+                                        </div>
+                                        <p class="card-text text-secondary mt-3 italic">
+                                            "{{ review.text|truncatechars:150 }}"
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 pb-3">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger px-3" data-bs-toggle="modal" data-bs-target="#deleteModal{{ review.id }}">
+                                                Видалити
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ review.id }}">
+                                                Редагувати
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 bg-light rounded shadow-sm">
+                        <p class="text-muted mb-3">Ви ще не залишили жодного відгуку.</p>
+                        <a href="{% url 'restaurants' %}" class="btn btn-primary px-4">Переглянути ресторани</a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
+
+{% for review in reviews %}
+    <div class="modal fade" id="deleteModal{{ review.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title">Підтвердження</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4 text-dark">
+                    <p class="mb-0">Видалити ваш відгук про <strong>{{ review.restaurant.name }}</strong>?</p>
+                </div>
+                <div class="modal-footer justify-content-center bg-light border-0">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Скасувати</button>
+                    <form action="{% url 'delete_review' review.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Так, видалити</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal{{ review.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0 bg-white" style="border-radius: 15px;">
+                <form action="{% url 'update_review' review.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header bg-primary text-white border-0">
+                        <h5 class="modal-title">Редагувати відгук</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 text-dark text-start">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ваша оцінка</label>
+                            <input type="number" name="rating" class="form-control" value="{{ review.rating }}" min="1" max="5">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ваш коментар</label>
+                            <textarea name="text" class="form-control" rows="4">{{ review.text }}</textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Скасувати</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Зберегти зміни</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<div class="modal fade" id="editProfileModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg bg-white" style="border-radius: 20px; position: relative; z-index: 1070;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark">Налаштування профілю</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" action="{% url 'edit_profile' %}">
+                {% csrf_token %}
+                <div class="modal-body p-4 text-start text-dark">
+                    
+                    <div class="mb-4 text-center">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover; border: 3px solid white;">
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_avatar" class="form-label fw-bold small text-uppercase">Змінити фото</label>
+                        <input type="file" name="avatar" id="id_avatar" class="form-control">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_bio" class="form-label fw-bold small text-uppercase">Про мене</label>
+                        <textarea name="bio" id="id_bio" class="form-control" rows="3" placeholder="Розкажіть про себе...">{{ user.profile.bio }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm font-weight-bold">Зберегти зміни</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    body.modal-open #main-content {
+        filter: blur(10px);
+        transition: filter 0.3s ease;
+        pointer-events: none; 
+    }
+
+    .modal {
+        pointer-events: auto !important; 
+        z-index: 1070 !important;
+    }
+    
+    .modal-content input, .modal-content textarea {
+        pointer-events: auto !important;
+        position: relative;
+        z-index: 1071;
+    }
+</style>
+
 {% endblock %}
