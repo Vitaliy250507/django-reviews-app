@@ -11,10 +11,12 @@ class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={
         'class': 'form-control',
         'placeholder': 'Ваш логін або пошта',
+        'autocomplete': 'off',
     }))
     password = forms.CharField(widget=forms.PasswordInput(attrs={
         'class': 'form-control',
         'placeholder': 'Ваш пароль',
+        'autocomplete': 'new-password',
     }))
 
 class ProfileUpdateImage(forms.ModelForm):
