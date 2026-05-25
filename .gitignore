@@ -12,3 +12,11 @@ staticfiles/
 
 # Poetry
 .venv
+
+# Coverage reports
+htmlcov/
+htmlcov_local/
+.coverage
+
+# Docker
+.data/

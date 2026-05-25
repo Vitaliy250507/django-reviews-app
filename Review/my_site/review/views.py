@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.detail import DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.contrib.auth.forms import UserCreationForm
@@ -52,7 +53,7 @@ class RestaurantDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = ReviewForm()
-        context["allreviews"] = self.object.reviews.all
+        context["allreviews"] = self.object.reviews.select_related('user').all()
         return context
     def post(self, request, *args, **kwargs):
         restaurant = self.get_object()
@@ -84,46 +85,46 @@ class SignUpView(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
 
-class ProfileView(TemplateView):
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = Profile
+    form_class = ProfileUpdateImage
     template_name = "registration/profile.html"
+    success_url = reverse_lazy('profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user.profile
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["reviews"] = Review.objects.filter(user = self.request.user)
+        context["reviews"] = Review.objects.filter(
+            user=self.request.user
+        ).select_related('restaurant')
         return context
 
-def delete_review(request, pk):
-    review = get_object_or_404(Review, pk=pk, user=request.user)
-    if request.method == 'POST':
-        review.delete()
-        return redirect('profile')
-    return redirect('profile')
+    def form_valid(self, form):
+        messages.success(self.request, "Профіль успішно оновлено!")
+        return super().form_valid(form)
 
-def update_review(request, pk):
-    review = get_object_or_404(Review, pk=pk, user=request.user)
-    if request.method == 'POST':
+class ReviewDeleteView(LoginRequiredMixin, DeleteView):
+    model = Review
+    success_url = reverse_lazy('profile')
+
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Відгук видалено!")
+        return super().delete(request, *args, **kwargs)
+
+class ReviewUpdateView(LoginRequiredMixin, View): 
+    def post(self, request, pk):
+        review = get_object_or_404(Review, pk=pk, user=request.user)
         form = ReviewForm(request.POST, instance=review)
+        
         if form.is_valid():
             form.save()
-            return redirect('profile')
-    return redirect('profile')
-
-
-@login_required
-def profile_view(request):
-    profile, created = Profile.objects.get_or_create(user=request.user)
-
-    form = ProfileUpdateImage(instance=profile)
-    reviews = Review.objects.filter(user=request.user)
-    
-    return render(request, 'reviews/profile.html', {
-        'reviews': reviews,
-        'profile_form': form
-    })
-
-@login_required
-def edit_profile(request):
-    if request.method == 'POST':
-        form = ProfileUpdateImage(request.POST, request.FILES, instance=request.user.profile)
-        if form.is_valid():
-            form.save()
-    return redirect('profile') 
+            messages.success(request, "Відгук оновлено!")
+        else:
+            messages.error(request, "Помилка при оновленні відгуку.")
+            
+        return redirect('profile')
