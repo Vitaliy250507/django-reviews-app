@@ -112,7 +112,7 @@ class ReviewDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
 
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         messages.success(self.request, "Відгук видалено!")
         return super().delete(request, *args, **kwargs)
 
