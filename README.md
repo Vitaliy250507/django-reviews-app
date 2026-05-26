@@ -43,7 +43,18 @@
    ```bash
    git clone [https://github.com/Vitaliy250507/Review.git](https://github.com/Vitaliy250507/Review.git)
    cd Review
+   ```
 
+2. **Налаштуйте оточення:**
+   Скопіюйте файл .env.example у свій файл .env.
+   ```bash
+   cp .env.example .env
+   ```
+3. **Запустіть проект через Docker Compose:**
+   ```bash
+   docker-compose up --build
+   ```
+   Після завершення білду сервіс буде доступний за адресою: http://127.0.0.1:8000
 ## Quality Assurance & Automation
 
 Проект підтримує високий стандарт якості завдяки автоматизованому процесу тестування.
